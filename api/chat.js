@@ -78,6 +78,7 @@ export default async function handler(req, res) {
       error: isApiKeyError
         ? 'Konfigurasi API key tidak valid. Periksa environment variable GEMINI_API_KEY.'
         : 'Terjadi kesalahan pada server. Silakan coba lagi.',
+      debug: err.message,
     });
   }
 }
