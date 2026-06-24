@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       systemInstruction: systemInstruction,
       generationConfig: {
         temperature: 0.7,
@@ -78,7 +78,6 @@ export default async function handler(req, res) {
       error: isApiKeyError
         ? 'Konfigurasi API key tidak valid. Periksa environment variable GEMINI_API_KEY.'
         : 'Terjadi kesalahan pada server. Silakan coba lagi.',
-      debug: err.message,
     });
   }
 }
