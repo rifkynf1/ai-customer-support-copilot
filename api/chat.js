@@ -41,7 +41,7 @@ export default async function handler(req, res) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.0-flash-lite',
       systemInstruction: systemInstruction,
       generationConfig: {
         temperature: 0.7,
@@ -71,14 +71,16 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('[KopiBot API Error]', err);
 
-    const isApiKeyError =
-      err.message?.includes('API_KEY') || err.message?.includes('API key');
+    const isApiKeyError = err.message?.includes('API_KEY') || err.message?.includes('API key');
+    const isQuotaError = err.message?.includes('429') || err.message?.includes('Too Many Requests') || err.message?.includes('quota');
 
-    res.status(500).json({
-      error: isApiKeyError
-        ? 'Konfigurasi API key tidak valid. Periksa environment variable GEMINI_API_KEY.'
-        : 'Terjadi kesalahan pada server. Silakan coba lagi.',
-      debug: err.message,
-    });
+    const statusCode = isQuotaError ? 429 : 500;
+    const errorMessage = isApiKeyError
+      ? 'Konfigurasi API key tidak valid. Periksa environment variable GEMINI_API_KEY.'
+      : isQuotaError
+        ? 'KopiBot sedang istirahat sebentar karena terlalu banyak permintaan. Coba lagi dalam 1 menit ya! ☕'
+        : 'Terjadi kesalahan pada server. Silakan coba lagi.';
+
+    res.status(statusCode).json({ error: errorMessage });
   }
 }
