@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/chat.js": {
+      "includeFiles": "rules.md"
+    }
+  },
   "rewrites": [
     { "source": "/api/chat", "destination": "/api/chat.js" },
     { "source": "/", "destination": "/public/index.html" }
