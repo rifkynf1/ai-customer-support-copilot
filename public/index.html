@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kafe Kopi Santai — Bekasi</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- marked.js CDN — render Markdown dari respons Gemini menjadi HTML -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            kopi: {
+              50:  '#fdf8f0',
+              100: '#faefd9',
+              200: '#f4d9a8',
+              300: '#ebbe6e',
+              400: '#e09e3a',
+              500: '#d4841e',
+              600: '#b86815',
+              700: '#984e14',
+              800: '#7c3f18',
+              900: '#673518',
+              950: '#3a1a09',
+            },
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    /* Animasi typing dots */
+    @keyframes bounce-dot {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+      40%            { transform: translateY(-6px); opacity: 1; }
+    }
+    .typing-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: #b86815;
+      animation: bounce-dot 1.2s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    /* Scrollbar tipis untuk chat */
+    #chat-messages::-webkit-scrollbar { width: 4px; }
+    #chat-messages::-webkit-scrollbar-track { background: transparent; }
+    #chat-messages::-webkit-scrollbar-thumb { background: #e09e3a; border-radius: 4px; }
+
+    /* Prose styling untuk Markdown di dalam bubble bot */
+    .bot-markdown p  { margin-bottom: 0.4rem; }
+    .bot-markdown ul { list-style: disc; padding-left: 1.2rem; margin-bottom: 0.4rem; }
+    .bot-markdown ol { list-style: decimal; padding-left: 1.2rem; margin-bottom: 0.4rem; }
+    .bot-markdown li { margin-bottom: 0.15rem; }
+    .bot-markdown strong { font-weight: 700; }
+    .bot-markdown em { font-style: italic; }
+    .bot-markdown table { border-collapse: collapse; width: 100%; margin-bottom: 0.5rem; font-size: 0.82rem; }
+    .bot-markdown th, .bot-markdown td { border: 1px solid #d4a26a; padding: 4px 8px; text-align: left; }
+    .bot-markdown th { background: #f4d9a8; font-weight: 600; }
+    .bot-markdown code { background: #faefd9; padding: 1px 4px; border-radius: 3px; font-family: monospace; font-size: 0.85em; }
+  </style>
+</head>
+
+<body class="font-sans bg-kopi-950 text-white min-h-screen">
+
+  <!-- ============================================================
+       LANDING PAGE
+       ============================================================ -->
+
+  <!-- Hero Section -->
+  <header class="relative overflow-hidden">
+    <!-- Background gradient -->
+    <div class="absolute inset-0 bg-gradient-to-br from-kopi-950 via-kopi-900 to-kopi-800"></div>
+    <!-- Dekoratif lingkaran -->
+    <div class="absolute -top-24 -right-24 w-96 h-96 bg-kopi-700 opacity-20 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-kopi-500 opacity-15 rounded-full blur-2xl"></div>
+
+    <div class="relative max-w-5xl mx-auto px-6 py-20 text-center">
+      <div class="inline-flex items-center gap-2 bg-kopi-800 border border-kopi-600 text-kopi-200 text-sm font-medium px-4 py-1.5 rounded-full mb-6">
+        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+        Buka Sekarang · 10.00 – 22.00 WIB
+      </div>
+
+      <h1 class="text-5xl md:text-7xl font-extrabold text-white leading-tight mb-4">
+        ☕ Kafe<br/>
+        <span class="text-kopi-300">Kopi Santai</span>
+      </h1>
+
+      <p class="text-lg md:text-xl text-kopi-200 max-w-xl mx-auto mb-8">
+        Tempat nongkrong favorit di Bekasi. Kopi berkualitas, suasana hangat,
+        dan Wi-Fi kencang — semua ada di sini.
+      </p>
+
+      <div class="flex flex-wrap justify-center gap-4 text-sm text-kopi-300">
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-kopi-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Jl. Raya Pekayon No. 88, Bekasi
+        </span>
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-kopi-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+          </svg>
+          Wi-Fi: <code class="bg-kopi-800 px-1.5 py-0.5 rounded text-kopi-200 font-mono">kopisantai123</code>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Menu Section -->
+  <section class="max-w-5xl mx-auto px-6 py-16">
+    <div class="text-center mb-10">
+      <h2 class="text-3xl font-bold text-white mb-2">Menu Pilihan</h2>
+      <p class="text-kopi-300">Dibuat dengan bahan pilihan, disajikan dengan cinta</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Kopi Susu Aren -->
+      <div class="bg-kopi-900 border border-kopi-700 rounded-2xl p-6 hover:border-kopi-500 hover:shadow-lg hover:shadow-kopi-900/50 transition-all duration-200">
+        <div class="text-3xl mb-3">☕</div>
+        <h3 class="text-lg font-bold text-white mb-1">Kopi Susu Aren</h3>
+        <p class="text-kopi-400 text-sm mb-3">Espresso, susu segar, dan gula aren pilihan</p>
+        <span class="text-kopi-300 font-semibold text-lg">Rp 18.000</span>
+      </div>
+
+      <!-- Iced Americano -->
+      <div class="bg-kopi-900 border border-kopi-700 rounded-2xl p-6 hover:border-kopi-500 hover:shadow-lg hover:shadow-kopi-900/50 transition-all duration-200">
+        <div class="text-3xl mb-3">🧊</div>
+        <h3 class="text-lg font-bold text-white mb-1">Iced Americano</h3>
+        <p class="text-kopi-400 text-sm mb-3">Double shot espresso over ice — bold & clean</p>
+        <span class="text-kopi-300 font-semibold text-lg">Rp 15.000</span>
+      </div>
+
+      <!-- Matcha Latte -->
+      <div class="bg-kopi-900 border border-kopi-700 rounded-2xl p-6 hover:border-kopi-500 hover:shadow-lg hover:shadow-kopi-900/50 transition-all duration-200">
+        <div class="text-3xl mb-3">🍵</div>
+        <h3 class="text-lg font-bold text-white mb-1">Matcha Latte</h3>
+        <p class="text-kopi-400 text-sm mb-3">Matcha grade A, susu oat, sedikit manis</p>
+        <span class="text-kopi-300 font-semibold text-lg">Rp 20.000</span>
+      </div>
+
+      <!-- Roti Bakar -->
+      <div class="bg-kopi-900 border border-kopi-700 rounded-2xl p-6 hover:border-kopi-500 hover:shadow-lg hover:shadow-kopi-900/50 transition-all duration-200">
+        <div class="text-3xl mb-3">🍞</div>
+        <h3 class="text-lg font-bold text-white mb-1">Roti Bakar</h3>
+        <p class="text-kopi-400 text-sm mb-3">Roti tebal dengan meses coklat & keju leleh</p>
+        <span class="text-kopi-300 font-semibold text-lg">Rp 15.000</span>
+      </div>
+
+      <!-- Kentang Goreng -->
+      <div class="bg-kopi-900 border border-kopi-700 rounded-2xl p-6 hover:border-kopi-500 hover:shadow-lg hover:shadow-kopi-900/50 transition-all duration-200">
+        <div class="text-3xl mb-3">🍟</div>
+        <h3 class="text-lg font-bold text-white mb-1">Kentang Goreng</h3>
+        <p class="text-kopi-400 text-sm mb-3">Renyah di luar, lembut di dalam, dengan saus tomat</p>
+        <span class="text-kopi-300 font-semibold text-lg">Rp 12.000</span>
+      </div>
+
+      <!-- CTA Card -->
+      <div class="bg-gradient-to-br from-kopi-700 to-kopi-600 border border-kopi-500 rounded-2xl p-6 flex flex-col justify-center items-center text-center">
+        <div class="text-3xl mb-3">🤖</div>
+        <h3 class="text-lg font-bold text-white mb-2">Butuh Rekomendasi?</h3>
+        <p class="text-kopi-200 text-sm mb-4">Tanya KopiBot di pojok kanan bawah!</p>
+        <button
+          onclick="toggleChat()"
+          class="bg-white text-kopi-800 font-semibold text-sm px-4 py-2 rounded-full hover:bg-kopi-100 transition-colors"
+        >
+          Chat Sekarang ↗
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Info Section -->
+  <section class="bg-kopi-900 border-t border-kopi-800">
+    <div class="max-w-5xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+      <div>
+        <div class="text-4xl mb-3">🕙</div>
+        <h4 class="font-bold text-white mb-1">Jam Operasional</h4>
+        <p class="text-kopi-300">Setiap Hari<br/>10.00 – 22.00 WIB</p>
+      </div>
+      <div>
+        <div class="text-4xl mb-3">📍</div>
+        <h4 class="font-bold text-white mb-1">Lokasi</h4>
+        <p class="text-kopi-300">Jl. Raya Pekayon No. 88<br/>Bekasi Selatan, Kota Bekasi</p>
+      </div>
+      <div>
+        <div class="text-4xl mb-3">📶</div>
+        <h4 class="font-bold text-white mb-1">Wi-Fi Gratis</h4>
+        <p class="text-kopi-300">Password:<br/><code class="bg-kopi-800 px-2 py-0.5 rounded font-mono text-kopi-200">kopisantai123</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-kopi-950 border-t border-kopi-900 py-6 text-center text-kopi-500 text-sm">
+    <p>© 2025 Kafe Kopi Santai · Dibuat dengan ☕ dan ❤️ di Bekasi</p>
+    <p class="mt-1 text-kopi-600">AI Chatbot powered by Google Gemini</p>
+  </footer>
+
+
+  <!-- ============================================================
+       FLOATING CHATBOT WIDGET
+       ============================================================ -->
+
+  <!-- Toggle Button -->
+  <button
+    id="chat-toggle-btn"
+    onclick="toggleChat()"
+    aria-label="Buka KopiBot"
+    class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-kopi-600 hover:bg-kopi-500 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition-all duration-300 hover:scale-110 active:scale-95"
+  >
+    <span id="toggle-icon">☕</span>
+  </button>
+
+  <!-- Chat Window -->
+  <div
+    id="chat-window"
+    class="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-24px)] flex flex-col rounded-2xl shadow-2xl border border-kopi-700 bg-kopi-950 overflow-hidden transition-all duration-300 origin-bottom-right"
+    style="height: 520px; display: none; opacity: 0; transform: scale(0.9);"
+  >
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-kopi-800 to-kopi-700 px-4 py-3.5 flex items-center gap-3 border-b border-kopi-600 flex-shrink-0">
+      <div class="w-9 h-9 bg-kopi-600 rounded-full flex items-center justify-center text-lg shadow">☕</div>
+      <div class="flex-1">
+        <p class="font-bold text-white text-sm leading-tight">KopiBot</p>
+        <p class="text-kopi-300 text-xs">Asisten Virtual Kafe Kopi Santai</p>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+        <span class="text-xs text-green-400">Online</span>
+      </div>
+    </div>
+
+    <!-- Messages Area -->
+    <div
+      id="chat-messages"
+      class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-kopi-950"
+    ></div>
+
+    <!-- Typing Indicator (hidden by default) -->
+    <div id="typing-indicator" class="px-4 pb-2 hidden flex-shrink-0">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 bg-kopi-700 rounded-full flex items-center justify-center text-xs flex-shrink-0">🤖</div>
+        <div class="bg-kopi-800 border border-kopi-700 rounded-2xl rounded-tl-sm px-3 py-2 flex items-center gap-1.5">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="text-kopi-400 text-xs ml-1">KopiBot sedang mengetik...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="px-3 py-3 border-t border-kopi-800 bg-kopi-900 flex gap-2 items-end flex-shrink-0">
+      <textarea
+        id="chat-input"
+        placeholder="Tanya tentang menu, harga, atau info kafe..."
+        rows="1"
+        class="flex-1 bg-kopi-800 border border-kopi-700 text-white placeholder-kopi-500 text-sm rounded-xl px-3 py-2.5 resize-none focus:outline-none focus:border-kopi-500 focus:ring-1 focus:ring-kopi-500 transition-colors max-h-28"
+        style="scrollbar-width: thin;"
+        onkeydown="handleInputKeydown(event)"
+        oninput="autoResizeTextarea(this)"
+      ></textarea>
+      <button
+        id="send-btn"
+        onclick="sendMessage()"
+        class="w-10 h-10 bg-kopi-600 hover:bg-kopi-500 disabled:bg-kopi-800 disabled:text-kopi-600 text-white rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
+        aria-label="Kirim pesan"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    // ── State ──────────────────────────────────────────────────────
+    let chatHistory = [];      // Array { role, parts } untuk Gemini API
+    let isChatOpen = false;
+    let isFirstOpen = true;
+    let isBotTyping = false;
+
+    // ── Utilitas DOM ───────────────────────────────────────────────
+    const chatWindow    = document.getElementById('chat-window');
+    const chatMessages  = document.getElementById('chat-messages');
+    const chatInput     = document.getElementById('chat-input');
+    const sendBtn       = document.getElementById('send-btn');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const toggleIcon    = document.getElementById('toggle-icon');
+
+    // ── Toggle widget buka/tutup ───────────────────────────────────
+    function toggleChat() {
+      isChatOpen = !isChatOpen;
+
+      if (isChatOpen) {
+        chatWindow.style.display = 'flex';
+        // Trigger animasi buka
+        requestAnimationFrame(() => {
+          chatWindow.style.opacity = '1';
+          chatWindow.style.transform = 'scale(1)';
+        });
+        toggleIcon.textContent = '✕';
+
+        // Kirim pesan sambutan pertama kali dibuka
+        if (isFirstOpen) {
+          isFirstOpen = false;
+          setTimeout(() => appendGreeting(), 400);
+        }
+
+        setTimeout(() => chatInput.focus(), 300);
+      } else {
+        chatWindow.style.opacity = '0';
+        chatWindow.style.transform = 'scale(0.9)';
+        setTimeout(() => { chatWindow.style.display = 'none'; }, 280);
+        toggleIcon.textContent = '☕';
+      }
+    }
+
+    // ── Pesan sambutan ─────────────────────────────────────────────
+    function appendGreeting() {
+      const greetingText =
+        'Halo! Selamat datang di **Kafe Kopi Santai** ☕\n\n' +
+        'Saya **KopiBot**, asisten virtual kafe ini. Saya siap membantu kamu dengan:\n' +
+        '- Info menu dan harga\n' +
+        '- Rekomendasi sesuai budget\n' +
+        '- Informasi lokasi & fasilitas kafe\n\n' +
+        'Ada yang bisa saya bantu hari ini? 😊';
+
+      appendMessage('bot', greetingText);
+    }
+
+    // ── Render bubble pesan ────────────────────────────────────────
+    function appendMessage(role, text) {
+      const wrapper = document.createElement('div');
+      wrapper.className = role === 'user'
+        ? 'flex justify-end'
+        : 'flex justify-start items-start gap-2';
+
+      if (role === 'bot') {
+        // Avatar bot
+        const avatar = document.createElement('div');
+        avatar.className = 'w-7 h-7 bg-kopi-700 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-1';
+        avatar.textContent = '🤖';
+        wrapper.appendChild(avatar);
+      }
+
+      const bubble = document.createElement('div');
+
+      if (role === 'user') {
+        bubble.className = 'max-w-[75%] bg-kopi-600 text-white rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-sm leading-relaxed';
+        // Teks user di-escape untuk keamanan (tidak perlu render Markdown)
+        bubble.textContent = text;
+      } else {
+        bubble.className = 'max-w-[80%] bg-kopi-800 border border-kopi-700 text-kopi-100 rounded-2xl rounded-tl-sm px-3.5 py-2.5 text-sm leading-relaxed bot-markdown';
+        // Render Markdown dari respons bot menggunakan marked.js
+        bubble.innerHTML = marked.parse(text);
+      }
+
+      wrapper.appendChild(bubble);
+      chatMessages.appendChild(wrapper);
+      scrollToBottom();
+    }
+
+    // ── Auto-scroll ke pesan terbaru ───────────────────────────────
+    function scrollToBottom() {
+      requestAnimationFrame(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      });
+    }
+
+    // ── Tampilkan / sembunyikan typing indicator ───────────────────
+    function setTyping(state) {
+      isBotTyping = state;
+      typingIndicator.classList.toggle('hidden', !state);
+      typingIndicator.style.display = state ? 'block' : 'none';
+      sendBtn.disabled = state;
+      chatInput.disabled = state;
+      scrollToBottom();
+    }
+
+    // ── Kirim pesan ke API ─────────────────────────────────────────
+    async function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text || isBotTyping) return;
+
+      // Tampilkan pesan user
+      appendMessage('user', text);
+
+      // Tambahkan ke history sebelum kirim (format Gemini)
+      chatHistory.push({ role: 'user', parts: [{ text }] });
+
+      // Reset input
+      chatInput.value = '';
+      autoResizeTextarea(chatInput);
+      setTyping(true);
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            // Kirim history tanpa pesan user terakhir (sudah di-handle API)
+            history: chatHistory.slice(0, -1),
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || `Error ${res.status}`);
+        }
+
+        const replyText = data.reply;
+
+        // Simpan respons bot ke history
+        chatHistory.push({ role: 'model', parts: [{ text: replyText }] });
+
+        setTyping(false);
+        appendMessage('bot', replyText);
+
+      } catch (err) {
+        console.error('[KopiBot Frontend Error]', err);
+        setTyping(false);
+
+        const errMsg =
+          'Maaf, ada gangguan teknis saat menghubungi server. ' +
+          'Silakan coba lagi dalam beberapa saat. 🙏';
+        appendMessage('bot', errMsg);
+
+        // Hapus entry user dari history karena request gagal
+        chatHistory.pop();
+      }
+    }
+
+    // ── Auto-resize textarea saat mengetik ────────────────────────
+    function autoResizeTextarea(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 112) + 'px';
+    }
+
+    // ── Kirim dengan Enter (Shift+Enter = newline) ─────────────────
+    function handleInputKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+  </script>
+
+</body>
+</html>
